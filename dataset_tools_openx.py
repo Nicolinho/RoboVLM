@@ -483,21 +483,21 @@ def n_step_pattern_builder(n: int) -> Any:
 
 
 
-def data_generator_openx(dataset, limit=1000000000):
-    for i, episode in enumerate(dataset):
-        if i >= limit:
-            break
-        yield process_episode(episode)
+# def data_generator_openx(dataset, limit=1000000000):
+#     for i, episode in enumerate(dataset):
+#         if i >= limit:
+#             break
+#         yield process_episode(episode)
 
-def process_episode(episode):
-    print(episode)
-    display_key = 'image'
-    # images = [step['observation'][display_key] for step in episode['steps']]
-    actions = [tf.concat([  step['action']['world_vector'],
-                            step['action']['rotation_delta'],
-                            step['action']['gripper_closedness_action'],
-                          ], axis=-1) for step in episode['steps']]
-    return {"images": images, "actions": actions}
+# def process_episode(episode):
+#     print(episode)
+#     display_key = 'image'
+#     # images = [step['observation'][display_key] for step in episode['steps']]
+#     actions = [tf.concat([  step['action']['world_vector'],
+#                             step['action']['rotation_delta'],
+#                             step['action']['gripper_closedness_action'],
+#                           ], axis=-1) for step in episode['steps']]
+#     return {"images": images, "actions": actions}
 
 def process_action(actions, gripper_range_2):
     if gripper_range_2: # whether the gripper action is in the range [-1,1] or [0,1]
@@ -693,7 +693,7 @@ def generator_taco_extra_data(data_path, traj_len=3, img_resize_dim=None, val_sp
 def num_proc_to_shard_string(num_proc):
     shard_size = 100 // num_proc
     return [f"[{i}%:{j}%]" for i, j in zip(range(0, 100, shard_size),
-                                          range(shard_size, 100+shard_size, shard_size))]
+                                          range(shard_size, 100+shard_size, shard_size))]f
 
 
 if __name__=='__main__':

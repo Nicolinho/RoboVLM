@@ -1,5 +1,25 @@
+## RoboVLM
 
-Install the following
+This is an open-source implementation tailored for utilizing VLMs in
+instruction-based robot control. This implementation supports
+a variety of VLM architectures and facilitates straightforward
+integration of new models. 
+
+![Page 1](assets/teaser_compressed.png)
+
+
+
+The approach implemented here is similar to
+[RT-2](https://arxiv.org/abs/2307.15818). 
+Different from RT-2, we support open-source Vision Language Models (VLMs) like BLIP, LLava, and QWen. 
+
+
+
+[//]: # (We use our framework to train multiple VLMs and evaluate them on a physical robot.)
+
+
+
+## Installation
 
 ```
 conda create -n llamaex python=3.10
@@ -15,14 +35,14 @@ pip install transformers transformers[torch] datasets evaluate torchvision sente
 pip install scikit-learn scipy wandb absl-py nltk rouge_score loralib bitsandbytes git+https://github.com/huggingface/peft.git matplotlib
 
 ```
-TF cpu version for loading the dataset
-```
-pip install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow_cpu-2.15.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-```
 
 For evaluation
 ```
 pip install opencv-python hydra-core
+```
+TF cpu version for loading the dataset
+```
+pip install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow_cpu-2.15.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
 ```
 For open-x dataset
 ```
@@ -48,4 +68,7 @@ Follow https://github.com/Dao-AILab/flash-attention?tab=readme-ov-file#installat
 ```
 FLASH_ATTENTION_SKIP_CUDA_BUILD=TRUE pip install flash-attn --no-build-isolation
 ```
+
+## Run an experiment
+
 

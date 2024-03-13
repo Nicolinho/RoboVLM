@@ -5,7 +5,7 @@ instruction-based robot control. This implementation supports
 a variety of VLM architectures and facilitates straightforward
 integration of new models. 
 
-![Page 1](assets/teaser_compressed.png)
+![plot](assets/teaser_compressed.png)
 
 
 

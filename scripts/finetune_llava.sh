@@ -2,9 +2,10 @@
 
 #accelerate launch --multi_gpu --gpu_ids 0,1,2,3 --num_processes 4 --mixed_precision no palme_model_openx.py \
 accelerate launch --mixed_precision no palme_model_openx.py \
-    --image_model_name_or_path "Qwen/Qwen-VL" \
-    --output_dir 'run_qwen' \
-    --run_name 'run_qwen' \
+    --image_model_name_or_path "liuhaotian/llava-v1.5-7b" \
+    --mm_projector_lr 0.00005 \
+    --output_dir 'run_llava' \
+    --run_name 'run_llava' \
     --per_device_train_batch_size 1 \
     --per_device_eval_batch_size 1 \
     --batch_size 128 \
@@ -28,4 +29,4 @@ accelerate launch --mixed_precision no palme_model_openx.py \
     --remove_unused_columns False  \
     --num_train_epochs 10  \
     --logging_steps 1  \
-    --ddp_find_unused_parameters True
+    --ddp_find_unused_parameters True 

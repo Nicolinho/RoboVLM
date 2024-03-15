@@ -13,13 +13,13 @@ from functools import partial
 from transformers import get_scheduler, AutoTokenizer, LlamaForCausalLM, AutoModelForCausalLM, \
     AutoImageProcessor, DefaultDataCollator, AutoModelForImageClassification, LlamaTokenizer, \
     CLIPModel, CLIPProcessor, AutoModel, CLIPImageProcessor, GPTQConfig, StoppingCriteria, \
-    StoppingCriteriaList, BitsAndBytesConfig
+    StoppingCriteriaList, BitsAndBytesConfig, HfArgumentParser
 
 from trainer import OpenXTrainer, LLaVATrainer
 
 from peft import LoraConfig, get_peft_model,  prepare_model_for_kbit_training
 
-from training_args import TrainingArguments
+from training_args import TrainingArguments, GeneralArguments
 
 # For training
 # from peft import PeftModelForCausalLM
@@ -1020,21 +1020,19 @@ def train(model, training_args):
     #                         num_proc=50, writer_batch_size=50)
     # # import sys; sys.exit()
 
-    # ds_train = Dataset.from_generator(generator_taco_extra_data,
-    #     gen_kwargs={
-    #         'data_path': "/home/dorka/data/tensorflow_ds/taco_play/extra_data/taco_extra_processed_15hz_resize/",
-    #         # 'limit': 1000000,
-    #         # 'shards': num_proc_to_shard_string(10),
-    #         # 'img_resize_dim': model.img_input_size,
-    #         "traj_len": 10}, #5
-    #     num_proc=10, writer_batch_size=50)
-    ds_train = load_dataset('/home/dorka/.cache/huggingface/datasets/generator/default-23f268c1c1e3bdbd/0.0.0/')['train']
+    ds_train = Dataset.from_generator(generator_taco_extra_data,
+        gen_kwargs={
+            'data_path': training_args.data_path,
+            # 'limit': 1000000,
+            # 'shards': num_proc_to_shard_string(10),
+            # 'img_resize_dim': model.img_input_size,
+            "traj_len": 10}, #5
+        num_proc=10, writer_batch_size=50)
 
-    # dataset = ds.train_test_split(test_size=0.005, writer_batch_size=5)
 
     ds_eval = Dataset.from_generator(generator_taco_extra_data,
         gen_kwargs={
-            'data_path': "/home/dorka/data/tensorflow_ds/taco_play/extra_data/taco_extra_processed_15hz_resize/",
+            'data_path': training_args.data_path,
             # 'limit': 1000000,
             # 'shards': num_proc_to_shard_string(10),
             # 'img_resize_dim': model.img_input_size,
@@ -1044,7 +1042,7 @@ def train(model, training_args):
 
     ds_eval_complete_fixed_traj = Dataset.from_generator(generator_taco_extra_data,
         gen_kwargs={
-            "data_path": "/home/dorka/data/tensorflow_ds/taco_play/extra_data/taco_extra_processed_15hz_resize/",
+            "data_path": training_args.data_path,
             "traj_len": 2000, "val_split": True, "return_robot_obs": True, "return_unprocessed_actions": True},
         writer_batch_size = 50)
 
@@ -1114,66 +1112,21 @@ def train(model, training_args):
         data_collator=data_collator,
     )
 
-@dataclass
-class TrainingArguments(TrainingArguments):
-    cache_dir: Optional[str] = field(default=None)
-    optim: str = field(default="adamw_torch")
-    remove_unused_columns: bool = field(default=False)
-    freeze_mm_mlp_adapter: bool = field(default=False)
-    mpt_attn_impl: Optional[str] = field(default="triton")
-    model_max_length: int = field(
-        default=512,
-        metadata={
-            "help":
-            "Maximum sequence length. Sequences will be right padded (and possibly truncated)."
-        },
-    )
-    double_quant: bool = field(
-        default=True,
-        metadata={"help": "Compress the quantization statistics through double quantization."}
-    )
-    quant_type: str = field(
-        default="nf4",
-        metadata={"help": "Quantization data type to use. Should be one of `fp4` or `nf4`."}
-    )
-    bits: int = field(
-        default=16,
-        metadata={"help": "How many bits to use."}
-    )
-    lora_enable: bool = False
-    lora_r: int = 64
-    lora_alpha: int = 16
-    lora_dropout: float = 0.05
-    lora_weight_path: str = ""
-    lora_bias: str = "none"
-    mm_projector_lr: Optional[float] = None
-    group_by_modality_length: bool = field(default=False)
-
 if __name__=="__main__":
-    # checkpoint_image_model = "google/vit-base-patch16-224-in21k"
-    checkpoint_image_model = "google/vit-large-patch16-224"
-    # checkpoint_image_model = "openai/clip-vit-large-patch14"
-    # checkpoint_image_model = "openai/clip-vit-base-patch32"
-    # checkpoint_image_model = "google/vit-base-patch32-384"
-    # checkpoint_image_model = "google/vit-large-patch32-384"
-    # checkpoint_image_model = "openai/clip-vit-large-patch14-336"
-    # checkpoint_image_model = "BAAI/EVA-CLIP-8B"
-    # checkpoint_image_model = 'apple/DFN5B-CLIP-ViT-H-14-378'
-    # checkpoint_image_model = 'apple/DFN5B-CLIP-ViT-H-14-378'
-    checkpoint_image_model = 'Qwen/Qwen-VL'
-    # checkpoint_image_model = 'Qwen/Qwen-VL-Chat-Int4' # for 4 bit, use fp16 in this case
-    # checkpoint_image_model = 'liuhaotian/llava-v1.5-7b'
-    # checkpoint_image_model = 'liuhaotian/llava-v1.5-13b'
-    # checkpoint_image_model = 'liuhaotian/llava-v1.6-vicuna-7b'
-    checkpoint_image_model = "Salesforce/instructblip-vicuna-7b"
-    # checkpoint_image_model = "Salesforce/instructblip-vicuna-13b"
-    # openai/clip-vit-large-patch14 for openx
-    # try blip2
+    parser = HfArgumentParser((GeneralArguments, TrainingArguments))
+    general_args, training_args = parser.parse_args_into_dataclasses()
 
-    per_device_train_batch_size = 1 #4
-    per_device_eval_batch_size = 1 #4
-    batch_size = 128 #128
-    gradient_accumulation_steps = batch_size // per_device_train_batch_size
+    device_index = Accelerator().process_index
+    device_map = {"": device_index}
+
+    if training_args.torch_dtype == 'bf16':
+        torch_dtype = torch.bfloat16
+    if training_args.torch_dtype == 'fp16':
+        torch_dtype = torch.float16
+    if training_args.torch_dtype == 'fp32':
+        torch_dtype = torch.float32
+
+    gradient_accumulation_steps = training_args.batch_size // training_args.per_device_train_batch_size
 
     device_map = "auto"
     world_size = int(os.environ.get("WORLD_SIZE", 1))
@@ -1183,63 +1136,20 @@ if __name__=="__main__":
         gradient_accumulation_steps = gradient_accumulation_steps // world_size
         print("updated gradient_accumulation_steps: ", gradient_accumulation_steps)
 
-
-    # run_name = 'taco_extradata_vitL_noquant'
-    # run_name = 'taco_extradata_qwen_eval'
-    run_name = 'taco_extradata_instrblib7b'
-    # run_name = 'test'
-    # run_name = 'eval_blip'
-    # noinspection PyArgumentList
-    training_args = TrainingArguments(
-        output_dir=run_name,
-        run_name=run_name,
-        evaluation_strategy="epoch",
-        per_device_train_batch_size=per_device_train_batch_size,
-        per_device_eval_batch_size=per_device_eval_batch_size,
-        gradient_accumulation_steps = gradient_accumulation_steps,
-        eval_accumulation_steps = 2,
-        fixed_traj_eval_hist_len = 5,
-        gradient_checkpointing=True,
-        gradient_checkpointing_kwargs={"use_reentrant": False},
-        save_safetensors=False,
-        save_strategy='epoch',
-        learning_rate = 3e-4,
-        mm_projector_lr = 2e-5, # llava https://github.com/haotian-liu/LLaVA/blob/main/scripts/v1_5/finetune_task_lora.sh
-        weight_decay = 0.1,
-        adam_beta2 = 0.95,
-        max_grad_norm=0.3,
-        lr_scheduler_type ="cosine",
-        optim="adamw_torch",
-        warmup_steps=20,
-        lora_r=32,
-        lora_alpha=64,
-        lora_dropout=0.05,
-        dataloader_num_workers=2,
-        remove_unused_columns=False,
-        num_train_epochs=10,
-        logging_steps=1,
-        ddp_find_unused_parameters=True,
-        report_to="wandb",
-
-    )
+    training_args.gradient_accumulation_steps = gradient_accumulation_steps
+    if training_args.gradient_checkpointing:
+        training_args.gradient_checkpointing_kwargs = {"use_reentrant": False}
 
 
-    acces_token = "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"
-    llama_checkpoint = "meta-llama/Llama-2-7b-hf"
-
-    device_index = Accelerator().process_index
-    device_map = {"": device_index}
-
-
-    model = Palme(llama_checkpoint=llama_checkpoint, acces_token=acces_token, image_model_name=checkpoint_image_model,
+    model = Palme(llama_checkpoint=training_args.llama_checkpoint, acces_token=training_args.acces_token,
+                  image_model_name=training_args.checkpoint_image_model,
                   training_args=training_args, output_dir = training_args.output_dir,
-                  load_in_8bit=False, load_in_4bit=False,
-                  lora_lm=True, lora_vision=False, freeze_vision=True, quantize_vision=True,
+                  load_in_8bit=training_args.load_in_8bit, load_in_4bit=training_args.load_in_4bit,
+                  lora_lm=training_args.lora_lm, lora_vision=False, freeze_vision=True, quantize_vision=True,
                   lora_r=training_args.lora_r, lora_alpha=training_args.lora_alpha, lora_dropout=training_args.lora_dropout,
                   device_map=device_map,
-                  torch_dtype = torch.bfloat16,
-                  # torch_dtype = torch.float16,
-                  flash_attn = "flash_attention_2", # "sdpa"
+                  torch_dtype = torch_dtype,
+                  flash_attn = training_args.flash_attn_implm, # "sdpa"
                   )
 
 

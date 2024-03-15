@@ -60,12 +60,8 @@ def visualize_actions(predicted_actions, gt_actions, resized_images, goal, title
 
     plt.legend()
 
-    # plt.savefig('/home/dorka/experiments/eval_openx_traj/eval_traj4.jpg')
-    # plt.savefig(f"/home/dorka/experiments/eval_openx_traj/eval_{title}.jpg")
     plt.savefig(pjoin(eval_result_dir, f"eval_{title}.jpg"))
 
-    # plt.imshow(stacked_img[0]-stacked_img[-1])
-    # plt.savefig('/home/dorka/experiments/eval_openx_traj/img_diff.jpg')
 
 
     plt.pause(1)
@@ -87,127 +83,12 @@ import hydra
 import cv2
 from datetime import datetime
 
-# from hulc2.evaluation.utils import imshow_tensor
-# # from hulc2.models.hulc2 import Hulc2
-# # from hulc2.utils.utils import format_sftp_path, get_checkpoints_for_epochs
-# from hulc2.wrappers.panda_rtx_wrapper import PandaRTXWrapper
-# from calvin_env.utils.utils import angle_between_angles
-# from robot_io.utils.utils import quat_to_euler
-
-
-
-
-
-
-
-# def load_model(cfg):
-#     tfa_policy = py_tf_eager_policy.SavedModelPyTFEagerPolicy(
-#         model_path=cfg.checkpoint_dir,
-#         load_specs_from_pbtxt=True,
-#         use_tf_function=True)
-#     print("finish loading policy")
-#
-#     # test the model with one frame of observation
-#     observation = {
-#         'image':
-#             np.zeros(shape=(256, 320, 3), dtype=np.uint8),
-#         'natural_language_instruction':
-#             np.zeros(shape=(), dtype=str),
-#         'natural_language_embedding':
-#             np.zeros(shape=(512), dtype=np.float32),
-#         # 'gripper_closed':
-#         #     np.zeros(shape=(1), dtype=np.float32),
-#         # 'height_to_bottom':
-#         #     np.zeros(shape=(1), dtype=np.float32),
-#         # 'base_pose_tool_reached':
-#         #     np.zeros(shape=(7), dtype=np.float32),
-#         # 'workspace_bounds':
-#         #     np.zeros(shape=(3, 3), dtype=np.float32),
-#         # 'orientation_box': np.zeros(shape=(2, 3), dtype=np.float32), 'orientation_start':
-#         #     np.zeros(shape=(4), dtype=np.float32),
-#         # 'src_rotation':
-#         #     np.zeros(shape=(4), dtype=np.float32),
-#         # 'robot_orientation_positions_box':
-#         #     np.zeros(shape=(3, 3), dtype=np.float32),
-#         # 'vector_to_go':
-#         #     np.zeros(shape=(3), dtype=np.float32),
-#         # 'rotation_delta_to_go':
-#         #     np.zeros(shape=(3), dtype=np.float32),
-#         # 'gripper_closedness_commanded':
-#         #     np.zeros(shape=(1), dtype=np.float32),
-#     }
-#
-#     tfa_time_step = ts.transition(observation, reward=np.zeros(()))
-#
-#     policy_state = tfa_policy.get_initial_state(batch_size=1)
-#
-#     action = tfa_policy.action(tfa_time_step, policy_state)
-#     print(f"RTX model initialized. Action space: {action.action}")
-#     return tfa_policy
 
 
 def lang_rollout(model, env, goal, hist_len, ep_len=500):
     print("Type your instruction which the robot will try to follow")
-    # while 1:
-    #     lang_input = [input("What should I do? \n")]
-    #     goal = lang_input[0]
-    #     print("sleeping 5 seconds...)")
-    #     time.sleep(6)
-    #     rollout(env, model, goal, embed_model)
     print(goal)
     rollout(env, model, goal, hist_len, ep_len=ep_len)
-
-
-def model_step(model, obs, policy_state, goal, goal_embed):
-    image = tf.cast(tf.image.resize_with_pad(obs['rgb_static'], target_width=320, target_height=256), np.uint8)
-    print(image.shape)
-    observation = {
-        'image': image.numpy(),
-        'natural_language_instruction': goal,
-        'natural_language_embedding': goal_embed,
-        # 'gripper_closed':
-        # np.zeros(shape=(1), dtype=np.float32),
-        # 'height_to_bottom':
-        #     np.zeros(shape=(1), dtype=np.float32),
-        # 'base_pose_tool_reached':
-        #     np.zeros(shape=(7), dtype=np.float32),
-        # 'workspace_bounds':
-        #     np.zeros(shape=(3, 3), dtype=np.float32),
-        # 'orientation_box':
-        #     np.zeros(shape=(2, 3), dtype=np.float32),
-        # 'orientation_start':
-        #     np.zeros(shape=(4), dtype=np.float32),
-        # 'src_rotation':
-        #     np.zeros(shape=(4), dtype=np.float32),
-        # 'robot_orientation_positions_box':
-        #     np.zeros(shape=(3, 3), dtype=np.float32),
-        # 'vector_to_go':
-        #     np.zeros(shape=(3), dtype=np.float32),
-        # 'rotation_delta_to_go':
-        #     np.zeros(shape=(3), dtype=np.float32),
-        # 'gripper_closedness_commanded':
-        #     np.zeros(shape=(1), dtype=np.float32),
-    }
-    tfa_time_step = ts.transition(observation, reward=np.zeros(()))
-    policy_step = model.action(tfa_time_step, policy_state)
-
-    return policy_step
-
-
-def to_relative_action(actions, robot_obs, max_pos=0.02, max_orn=0.05):
-    assert isinstance(actions, np.ndarray)
-    assert isinstance(robot_obs, np.ndarray)
-    # assert isinstance(actions, torch.tensor)
-    # assert isinstance(robot_obs, torch.tensor)
-
-    rel_pos = actions[:3] - robot_obs[:3]
-    rel_pos = np.clip(rel_pos, -max_pos, max_pos) / max_pos
-
-    rel_orn = angle_between_angles(robot_obs[3:6], actions[3:6])
-    rel_orn = np.clip(rel_orn, -max_orn, max_orn) / max_orn
-
-    gripper = actions[-1:]
-    return np.concatenate([rel_pos, rel_orn, gripper])
 
 
 def _unscale_actions_by_bounds(actions, lows, highs, safety_margin=0.01):
@@ -241,15 +122,6 @@ def _unscale_action(action):
 
 def tfa_action_to_bridge_action(tfa_action):
     return np.concatenate((tfa_action['world_vector'], tfa_action['rotation_delta'], tfa_action['gripper_closedness_action']))
-
-
-def obs_dict_to_np(robot_obs):
-    tcp_pos = robot_obs["tcp_pos"]
-    tcp_orn = quat_to_euler(robot_obs["tcp_orn"])
-    gripper_width = robot_obs["gripper_opening_width"]
-    gripper_action = 1 if gripper_width > 0.06 else -1
-
-    return np.concatenate([tcp_pos, tcp_orn, [gripper_action]])
 
 
 def rollout(env, model, goal, hist_len, ep_len=5000):
@@ -337,9 +209,6 @@ def evaluate_on_fixed_trajectory(model, hist_len, traj, name="", eval_result_dir
         action = np.array(action)
         gt_action = np.array(traj['actions_unprocessed'][step])
 
-        # curr_pose = obs_dict_to_np(obs["robot_state"]) # TODO what is the input action format to the visualizer
-        # rel_act = to_relative_action(action, curr_pose)
-        # rel_act_torch = torch.tensor(rel_act)
 
         pred_actions.append(action)
         gt_actions.append(gt_action)
@@ -381,11 +250,9 @@ def main(cfg):
 
     robot, env = None, None
 
-    checkpoint_dir_path = "/home/dorka/chkpts/run_openx_test/checkpoint-865"
-    checkpoint_dir_path = "/home/dorka/chkpts/taco_extradata_vit/checkpoint-435"
-    # checkpoint_dir_path = "/home/dorka/chkpts/taco_extradata_clip/checkpoint-435"
+    checkpoint_dir_path = None
 
-    acces_token = "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"
+    acces_token = None # insert token if needed
     llama_checkpoint = "meta-llama/Llama-2-7b-hf"
 
     checkpoint_image_model = "google/vit-base-patch16-224-in21k"
@@ -399,15 +266,6 @@ def main(cfg):
     # for inference
     hist_len = 5
 
-    # model = Palme(llama_checkpoint=llama_checkpoint, acces_token=acces_token, image_model_name=checkpoint_image_model,
-    #               config=None, output_dir = None,
-    #               load_in_8bit=True,
-    #               lora_lm=True, lora_vision=False, freeze_vision=True,
-    #               device_map=device_map,
-    #               torch_dtype = torch.bfloat16,
-    #               # torch_dtype = torch.float16,
-    #               )
-
 
     model = Palme(llama_checkpoint=llama_checkpoint, acces_token=acces_token, image_model_name=checkpoint_image_model,
                   # config=None,
@@ -420,24 +278,6 @@ def main(cfg):
                   torch_dtype = torch.bfloat16,
                   )
 
-    ## model.load("/home/dorka/projects/23/llama-openx/palme/palme/taco_alldata/checkpoint-880/pytorch_model.bin")
-    # model.load("/home/dorka/chkpts/run_openx_test/checkpoint-173/pytorch_model.bin")
-    #
-    # model.lm = model.lm._unload_and_optionally_merge(dtype=torch.bfloat16) # does not work on titan x
-    # ## model = model.merge_and_unload() # does not work on titan x
-    #
-    # torch.save(model.lm.state_dict(),
-    #            "/home/dorka/chkpts/run_openx_test/checkpoint-173/dequant_lm2/pytorch_model.bin")
-    # torch.save(model.img_embed_model.classifier.state_dict(),
-    #            "/home/dorka/chkpts/run_openx_test/checkpoint-173/dequant_lm2/img_embed_model_classifier_model.bin")
-
-    # model.lm.load_state_dict(torch.load(
-    #     "/home/dorka/chkpts/run_openx_test/checkpoint-173/dequant_lm2/pytorch_model.bin",
-    #                                    map_location="cpu"))
-    #
-    # model.img_embed_model.classifier.load_state_dict(torch.load(
-    #     "/home/dorka/chkpts/run_openx_test/checkpoint-173/dequant_lm2/img_embed_model_classifier_model.bin",
-    #                                    map_location="cpu"))
 
     model.lm.load_state_dict(torch.load(
         pjoin(checkpoint_dir_path, 'dequant', 'lm_model.bin'), map_location="cpu"))

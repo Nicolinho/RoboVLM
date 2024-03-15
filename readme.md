@@ -70,5 +70,7 @@ FLASH_ATTENTION_SKIP_CUDA_BUILD=TRUE pip install flash-attn --no-build-isolation
 ```
 
 ## Run an experiment
+Training scripts for each model can be found under
+[scripts](scripts).
 
 

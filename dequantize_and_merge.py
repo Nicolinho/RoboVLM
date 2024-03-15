@@ -7,14 +7,9 @@ from palme_model_openx import Palme
 
 if __name__ == "__main__":
 
+    checkpoint_dir_path = None # insert path to weights
 
-    # checkpoint_dir_path = "/home/dorka/projects/23/llama-openx/palme/palme/taco_alldata/checkpoint-880/"
-    checkpoint_dir_path = "/home/dorka/chkpts/run_openx_test/checkpoint-521/"
-    checkpoint_dir_path = "/home/dorka/projects/23/llama-openx/palme/palme/taco_extradata_vitL/checkpoint-352"
-    checkpoint_dir_path = "/home/dorka/projects/23/llama-openx/palme/palme/taco_extradata_clipL_single_proj/checkpoint-703"
-    # checkpoint_dir_path = "/home/dorka/projects/23/llama-openx/palme/palme/taco_alldata_vitL224_norm_noquant/checkpoint-2642"
-
-    acces_token = "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"
+    acces_token =  None # insert token if neede
     llama_checkpoint = "meta-llama/Llama-2-7b-hf"
 
     #checkpoint_image_model = "google/vit-base-patch16-224-in21k"
@@ -36,7 +31,6 @@ if __name__ == "__main__":
                   torch_dtype = torch.bfloat16,
                   )
 
-    ## model.load("/home/dorka/projects/23/llama-openx/palme/palme/taco_alldata/checkpoint-880/pytorch_model.bin")
     print("Load trained model")
     model.load(pjoin(checkpoint_dir_path, "pytorch_model.bin"))
     #

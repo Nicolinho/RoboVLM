@@ -119,11 +119,9 @@ if __name__ == "__main__":
     from accelerate import Accelerator
     from os.path import join as pjoin
 
-    # checkpoint_dir_path = "/home/dorka/projects/23/llama-openx/palme/palme/taco_alldata/checkpoint-880/"
-    checkpoint_dir_path = "/home/dorka/chkpts/run_openx_test/checkpoint-521/"
-    checkpoint_dir_path = "/home/dorka/projects/23/llama-openx/palme/palme/taco_extradata_vitL_noquant/checkpoint-435"
+    checkpoint_dir_path = None
 
-    acces_token = "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"
+    acces_token = None # insert if needed
     llama_checkpoint = "meta-llama/Llama-2-7b-hf"
 
     #checkpoint_image_model = "google/vit-base-patch16-224-in21k"
@@ -143,7 +141,6 @@ if __name__ == "__main__":
                   torch_dtype = torch.bfloat16,
                   )
 
-    ## model.load("/home/dorka/projects/23/llama-openx/palme/palme/taco_alldata/checkpoint-880/pytorch_model.bin")
     print("Load trained model")
     model.load(pjoin(checkpoint_dir_path, "pytorch_model.bin"))
     #

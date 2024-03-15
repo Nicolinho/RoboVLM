@@ -1,5 +1,6 @@
-import time
-
+"""
+Examplary script to run the model on a real robot.
+"""
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -235,25 +236,9 @@ def main(cfg):
     env = hydra.utils.instantiate(cfg.env, robot=robot)
     env = PandaRTXWrapper(env, relative_action=True)
 
-    # robot, env = None, None
+    checkpoint_dir_path = None # insert path to trained model weights here
 
-    # scp -r taco_alldata_vitL224_norm_noquant/checkpoint-2642/dequant dorka@knoppers:~/chkpts/taco_alldata_vitL224_norm_noquant/checkpoint-2642
-    # scp -r taco_extradata_vitL_noquant/checkpoint-435/dequant dorka@knoppers:~/chkpts/taco_extradata_vitL_noquant/checkpoint-435
-    # scp -r taco_extradata_clipL_single_proj/checkpoint-703/dequant/ dorka@knoppers:~/chkpts/taco_extradata_clipL_single_proj/checkpoint-703
-    # scp -r taco_extradata_vitL/checkpoint-352/dequant dorka@knoppers:~/chkpts/taco_extradata_vitL/checkpoint-352
-
-    # checkpoint_dir_path = "/export/home/dorka/chkpts/taco_extradata_vitL/checkpoint-352"
-    # checkpoint_dir_path = "/export/home/dorka/chkpts/taco_extradata_clipL_single_proj/checkpoint-703"
-    # checkpoint_dir_path = "/export/home/dorka/chkpts/taco_extradata_vitL_noquant/checkpoint-435"
-    checkpoint_dir_path = "/export/home/dorka/chkpts/taco_extradata_qwen/checkpoint-435"
-    # checkpoint_dir_path = "/export/home/dorka/chkpts/taco_extradata_llava7bv15_tune_proj_lm/checkpoint-215"
-    # checkpoint_dir_path = "/export/home/dorka/chkpts/taco_extradata_llava7bv15_tune_lm/checkpoint-215"
-    # checkpoint_dir_path = "/export/home/dorka/chkpts/taco_extradata_llava7bv15_tune_proj/checkpoint-215"
-    # checkpoint_dir_path = "/export/home/dorka/chkpts/taco_extradata_instrblib7b/checkpoint-351"
-
-    # checkpoint_dir_path = "/home/dorka/chkpts/taco_alldata/checkpoint-876"
-
-    acces_token = "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"
+    acces_token = None # insert llama access token if needed
     llama_checkpoint = "meta-llama/Llama-2-7b-hf"
 
     if 'qwen' in checkpoint_dir_path:
@@ -273,15 +258,6 @@ def main(cfg):
     # for inference, this can be adjusted during inference. Differnt values could be tried, but 5 is maybe good tradeoff between speed and performance
     # models are trained with hist len up to 10
     hist_len = 5
-
-    # model = Palme(llama_checkpoint=llama_checkpoint, acces_token=acces_token, image_model_name=checkpoint_image_model,
-    #               config=None, output_dir = None,
-    #               load_in_8bit=True,
-    #               lora_lm=True, lora_vision=False, freeze_vision=True,
-    #               device_map=device_map,
-    #               torch_dtype = torch.bfloat16,
-    #               # torch_dtype = torch.float16,
-    #               )
 
     dummy_model = False
 
@@ -318,25 +294,6 @@ def main(cfg):
 
         model.do_torch_compile()
         # save_pretrained to be able to load it faster
-
-    # model.load("/home/dorka/projects/23/llama-openx/palme/palme/taco_alldata/checkpoint-880/pytorch_model.bin")
-    # model.load("/home/dorka/chkpts/run_openx_test/checkpoint-173/pytorch_model.bin")
-    #
-    # model.lm = model.lm._unload_and_optionally_merge(dtype=torch.bfloat16) # does not work on titan x
-    # ## model = model.merge_and_unload() # does not work on titan x
-    #
-    # torch.save(model.lm.state_dict(),
-    #            "/home/dorka/chkpts/run_openx_test/checkpoint-173/dequant_lm2/pytorch_model.bin")
-    # torch.save(model.img_embed_model.classifier.state_dict(),
-    #            "/home/dorka/chkpts/run_openx_test/checkpoint-173/dequant_lm2/img_embed_model_classifier_model.bin")
-
-    # model.lm.load_state_dict(torch.load(
-    #     "/home/dorka/chkpts/run_openx_test/checkpoint-173/dequant_lm2/pytorch_model.bin",
-    #                                    map_location="cpu"))
-    #
-    # model.img_embed_model.classifier.load_state_dict(torch.load(
-    #     "/home/dorka/chkpts/run_openx_test/checkpoint-173/dequant_lm2/img_embed_model_classifier_model.bin",
-    #                                    map_location="cpu"))
 
     load_demonstration = False
     if load_demonstration:
